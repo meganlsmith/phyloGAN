@@ -58,5 +58,16 @@ To continue a run for which checkpoint files have previously been generated:
 
 For an example of phyloGAN (concatenation) output, see `example_results`. 
 
+* Lambdas from stage 1 are recorded in Lambdas.txt.
+* Discriminator accuracies are recorded in DiscriminatorRealAcc.txt and DiscriminatorFakeAcc.txt.
+* Generator accuracies are recorded in GenratorFakeAcc.txt.
+* Discriminator losses are recorded in DiscriminatorLoss.txt.
+* Generator losses are recorded in GeneratorLoss.txt.
+* The trees at each iteration are recorded in Trees.txt.
+* Robinson–Foulds distances between each tree and the true tree (when provided) are recorded in RFdistances.txt.
+* Various plots are provided in .png format.
+
+
+
 
 
