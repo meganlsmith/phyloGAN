@@ -33,7 +33,7 @@ The original version of phyloGAN takes as input a concatenated alignment and inf
 
 #### Concatenated alignment
 
-The concatenated alignment should be provided in phylip format. For an example see test_data/concatenated_test.phy.
+The concatenated alignment should be provided in phylip format. For an example see `test_data/concatenated_test.phy`.
 
 #### Parameters file
 
