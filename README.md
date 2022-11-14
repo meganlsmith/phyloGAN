@@ -84,6 +84,12 @@ The params file is similar to that needed in the original version. For an exampl
 
 ### Running phyloGAN-ILS.
 
+Unpack test gene alignments:
+
+    cd test_data
+    tar -xzf gene_alignments.tar.gz
+    cd ../
+
 To run phyloGAN:
 
     python ./phyloGAN_ils/scripts/phyloGAN.py ./test_data/params_coalescent.txt
