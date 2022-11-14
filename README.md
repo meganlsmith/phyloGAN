@@ -54,7 +54,9 @@ To continue a run for which checkpoint files have previously been generated:
 
     python ./phyloGAN/scripts/phyloGAN.py ./test_data/params_concatenated.txt checkpoint
 
+### Output 
 
+For an example of phyloGAN (concatenation) output, see `example_results`. 
 
 
 
