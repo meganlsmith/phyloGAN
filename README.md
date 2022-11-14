@@ -67,6 +67,36 @@ For an example of phyloGAN (concatenation) output, see `example_results`.
 * Robinson–Foulds distances between each tree and the true tree (when provided) are recorded in `RFdistances.txt`.
 * Various plots are provided in `.png` format.
 
+## phyloGAN-ILS
+
+phyloGAN-ILS takes as input a folder with gene alignments and infers a species tree.
+
+### Input Files
+
+#### Gene alignments
+
+A directory containing single copy gene alignments should be provided to phyloGAN. If any species is missing from an alignment, it should be included with 'N's.
+
+#### Parameters file
+
+The params file is similar to that needed in the original version. For an example see `test_data/params_coalescent.txt`
+
+
+### Running phyloGAN-ILS.
+
+To run phyloGAN:
+
+    python ./phyloGAN_ils/scripts/phyloGAN.py ./test_data/params_coalescent.txt
+
+To continue a run for which checkpoint files have previously been generated:
+
+    python ./phyloGAN_ils/scripts/phyloGAN.py ./test_data/params_coalescent.txt checkpoint
+
+
+
+
+
+
 
 
 
