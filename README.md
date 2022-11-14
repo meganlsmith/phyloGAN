@@ -37,7 +37,7 @@ The concatenated alignment should be provided in phylip format. For an example s
 
 #### Parameters file
 
-The only other input to phyloGAN is the parameters file. For an example see test_data/params_concatenated.txt. In the example file, each line is described in a comment (following '#'). A few things to note:
+The only other input to phyloGAN is the parameters file. For an example see `test_data/params_concatenated.txt`. In the example file, each line is described in a comment (following '#'). A few things to note:
 
 * The temporary folder provided will be deleted during the run. *DO NOT* use an existing folder. This must be a new directory. If using an HPC, scratch spaces may be ideal because a lot of I/O to this directory will occur.
 * The pseudoobserved setting is only recommended to be used in specific development contexts. Datasets are simulated from branch lengths drawn from an exponential distribution with mean lambda, and this is likely not desired in most simulation studies.
