@@ -7,3 +7,17 @@ phyloGAN is a Generative Adversarial Network (GAN) that infers phylognetic relat
 ## Installation
 
 ### Depedencies 
+
+phyloGAN requires several python packages, along with AliSim.
+
+#### Python packages
+##### Handling trees and alignments
+Biopython, dendropy, ete3
+##### Machine learning
+tensorflow
+##### Miscellaneous utilities
+copy, datetime, io, itertools, matplotlib, numpy, os, random, re, scipy, sys
+
+#### AliSim
+phyloGAN was developed using the version of AliSim distributed with IQ-TREE v2.2.0 (Beta). A version of IQ-TREE with AliSim must be installed, and the user must provide the path to the executable.
+
