@@ -3,7 +3,7 @@
 IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2 # Path to executable for IQ-TREE.
 
 # Input files
-alignment file = test_concatenated.phy # Path to concatenated alignment in phylip format.
+alignment file = ./test_data/test_concatenated.phy # Path to concatenated alignment in phylip format.
 start tree = Random # Indicate whether phyloGAN should start with a random ('Random') or neighbor joining ('NJ') tree. Random tree setting is recommended.
 
 # Output files
