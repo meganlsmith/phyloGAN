@@ -1,6 +1,6 @@
 # Path Parameters
 
-IQTree path = /N/u/mls16/Carbonate/Programs/iqtree-2.2.0-beta-Linux/bin/iqtree2 # Path to executable for IQ-TREE.
+IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2 # Path to executable for IQ-TREE.
 
 # Input files
 alignment folder = ./test_data/gene_alignments # Path to directory containing only the gene alignments.
