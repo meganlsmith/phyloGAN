@@ -1,0 +1,51 @@
+# Path Parameters
+
+IQTree path = /N/u/mls16/Carbonate/Programs/iqtree-2.2.0-beta-Linux/bin/iqtree2
+
+# Input files
+alignment folder = ./input_test2/alignments_1_rename/ 
+start tree = Random # Random or provide the path to a file with a starting tree in newick format.
+check point = 50
+# Output files
+results = full_six_coal_test2 # name of results folder
+temp = /dev/shm/mls16/phyloGAN_organized_13October2022/coal_test_function_for_mods/full_six_coal_test2 # name of temp folder, will be deleted
+
+# Models and model parameters
+
+Nucleotide substitution model = JC
+Min coal = 0.01
+Max coal = 10
+Min scale = 0.001
+Max scale = 0.05
+Width coal = None
+Width scale = None
+
+# Training steps and parameters
+
+# all stages
+Gene tree samples = 2
+Length = 500 # number of basepairs per gene tree
+Batch size = 2 # number of chunks to use in each mini-batch
+
+# stage 1
+
+Stage 1 Iterations = 2 # number of training iterations in stage 1
+Stage 1 Proposals = 1 # number of parameter proposals to consider at each training iteration in stage 1, defaults to 15
+
+# stage 2
+Stage 2 Pre-training Iterations = 2 # number of pre-training iterations in stage 2
+Stage 2 Training Iterations = 2 # number of training iterations in stage 2
+Stage 2 Pre-training Epochs = 1 # number of pre-training epochs in stage 2
+Stage 2 Training Epochs = 1 # number of training epochs in stage 2, defaults to match number of pre-training epochs
+Max Trees = 1 # maximum number of trees to consider at each training iteration in stage 2, defaults to 5
+
+# Simulation parameters
+Simulate_pseudoobserved = False
+Simulation nucleotide substitution model = JC
+Gene trees = 1000 # Number of gene trees to simulate
+Num taxa = 6 # Number of taxa
+Coal time = 10 # mean of the exponential distribution parameterizing internal branch lengths in coalescent units
+Scale = 0.001 # scaling parameter for simulating sequence data in alisim
+Output pseudoobserved = ./pseudoobserved_six_coal_rep1/ # directory and prefix for pseudoobserved data
+true tree = ./input_test2/baseline.tre # defaults to location in pseudoobserved output directory
+

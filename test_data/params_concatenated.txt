@@ -1,0 +1,48 @@
+# Path Parameters
+
+IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2
+
+# Input files
+alignment file = ./input/five_rep1.phy 
+start tree = Random 
+
+# Output files
+results = full_five_rep1 # name of results folder
+temp = ./temp_five_rep1/ # name of temp folder, will be deleted
+checkpoint interval = 2
+
+# Models and model parameters
+
+Nucleotide substitution model = HKY{2} 
+Min lambda = 1 # minimum bound on birth rate
+Max lambda = 30 # maximum bound on birth rate
+Width lambda = None # width of lambda proposals. Defaults to (Max_lambda + Min_lambda)/2/2
+
+
+# Training steps and parameters
+
+# all stages
+
+Length = 500 # number of basepairs in each 'chunk'
+Chunks = 25 # number of chunks to use in each mini-batch
+
+# stage 1
+
+Stage 1 Iterations = 2 # number of training iterations in stage 1
+Stage 1 Proposals = 1 # number of parameter proposals to consider at each training iteration in stage 1, defaults to 15
+
+# stage 2
+Stage 2 Pre-training Iterations = 2 # number of pre-training iterations in stage 2
+Stage 2 Training Iterations = 2 # number of training iterations in stage 2
+Stage 2 Pre-training Epochs = 2 # number of pre-training epochs in stage 2
+Stage 2 Training Epochs = 2 # number of training epochs in stage 2, defaults to match number of pre-training epochs
+Max Trees = 2 # maximum number of trees to consider at each training iteration in stage 2, defaults to 5
+
+# Simulation parameters
+Simulate_pseudoobserved = False
+Simulation nucleotide substitution model = JC
+Full length = 50000 # total length of sequence to be simulated
+Num taxa = 5 # Number of taxa
+Birth rate = 10 # birth rate in birth-death model
+Output pseudoobserved = None # directory and prefix for pseudoobserved data
+true tree =  ./five_baseline.treefile # defaults to location in pseudoobserved output directory
