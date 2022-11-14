@@ -48,5 +48,5 @@ Num taxa = 6 # Number of taxa in pseudoobserved datasets.
 Coal time = 10 # Mean of the exponential distribution parameterizing internal branch lengths in coalescent units for pseudoobserved datasets.
 Scale = 0.001 # Scaling parameter for simulating sequence data in AliSim for pseudoobserved datasets.
 Output pseudoobserved = ./pseudoobserved_six_coal_rep1/ # Directory and prefix for pseudoobserved data storage.
-true tree = ./input_test2/baseline.tre # Path to the 'true' tree. Defaults to location in pseudoobserved output directory when pseudoobserved data are simulated. Use None if not available.
+true tree = test_data/true_ils.tre # Path to the 'true' tree. Defaults to location in pseudoobserved output directory when pseudoobserved data are simulated. Use None if not available.
 
