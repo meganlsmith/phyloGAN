@@ -11,8 +11,7 @@ phyloGAN is a Generative Adversarial Network (GAN) that infers phylognetic relat
 phyloGAN requires several python packages, along with AliSim.
 
 #### Python packages
-##### Handling trees and alignments
-Biopython, dendropy, ete3
+<b> Handling trees and alignments <\b>: Biopython, dendropy, ete3
 ##### Machine learning
 tensorflow
 ##### Miscellaneous utilities
