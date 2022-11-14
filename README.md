@@ -22,6 +22,7 @@ phyloGAN was developed using the version of AliSim distributed with IQ-TREE v2.2
 
 ### phyloGAN
 To install phyloGAN, clone the GitHub repository:
+
     git clone github.com/meganlsmith/phyloGAN.
 
 ## phyloGAN (concatenation version)
