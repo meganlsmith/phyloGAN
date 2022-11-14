@@ -12,7 +12,9 @@ phyloGAN requires several python packages, along with AliSim.
 
 #### Python packages
 **Handling trees and alignments:** Biopython, dendropy, ete3
-**Machine learning:**tensorflow
+
+**Machine learning:** tensorflow
+
 **Miscellaneous utilities:** copy, datetime, io, itertools, matplotlib, numpy, os, random, re, scipy, sys
 
 #### AliSim
