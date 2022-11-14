@@ -45,4 +45,4 @@ Full length = 50000 # Total length of sequence to be simulated for pseudoobserve
 Num taxa = 5 # Number of taxa in pseudoobserved datasets.
 Birth rate = 10 # Lambda to use when simulating pseudoobserved datasets.
 Output pseudoobserved = None # Directory and prefix for pseudoobserved data storage.
-true tree =  ./five_baseline.treefile # Path to the 'true' tree. Defaults to location in pseudoobserved output directory when pseudoobserved data are simulated.
+true tree =  test_data/true_concatenated.tre # Path to the 'true' tree. Defaults to location in pseudoobserved output directory when pseudoobserved data are simulated. Use None if not available.
