@@ -3,12 +3,12 @@
 IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2 # Path to executable for IQ-TREE.
 
 # Input files
-alignment file = ./input/five_rep1.phy # Path to concatenated alignment in phylip format.
+alignment file = test_concatenated.phy # Path to concatenated alignment in phylip format.
 start tree = Random # Indicate whether phyloGAN should start with a random ('Random') or neighbor joining ('NJ') tree. Random tree setting is recommended.
 
 # Output files
-results = full_five_rep1 # Path to folder for storing results.
-temp = ./temp_five_rep1/ # Path to temp folder for storing temporary files. This file will be deleted periodically.
+results = test_rep1 # Path to folder for storing results.
+temp = ./temp_rep1/ # Path to temp folder for storing temporary files. This file will be deleted periodically.
 checkpoint interval = 50 # Frequency at which checkpoint files should be stored. For example, 50 indicates that checkpoints will be stored every 50 iterations.
 
 # Models and model parameters
