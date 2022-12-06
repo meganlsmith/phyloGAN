@@ -3,8 +3,8 @@
 IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2
 
 # Input files
-alignment file = ./test_data/five_rep1.phy 
-start tree = Random 
+alignment file = ./test_data/concatenated_test.phy 
+start tree = Random
 
 # Output files
 results = full_five_rep1 # name of results folder
@@ -13,7 +13,7 @@ checkpoint interval = 2
 
 # Models and model parameters
 
-Nucleotide substitution model = HKY{2} 
+Nucleotide substitution model = HKY{2}
 Min lambda = 1 # minimum bound on birth rate
 Max lambda = 30 # maximum bound on birth rate
 Width lambda = None # width of lambda proposals. Defaults to (Max_lambda + Min_lambda)/2/2
