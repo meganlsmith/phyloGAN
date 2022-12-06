@@ -3,7 +3,7 @@
 IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2
 
 # Input files
-alignment file = ./input/five_rep1.phy 
+alignment file = ./test_data/five_rep1.phy 
 start tree = Random 
 
 # Output files
@@ -45,4 +45,4 @@ Full length = 50000 # total length of sequence to be simulated
 Num taxa = 5 # Number of taxa
 Birth rate = 10 # birth rate in birth-death model
 Output pseudoobserved = None # directory and prefix for pseudoobserved data
-true tree =  ./five_baseline.treefile # defaults to location in pseudoobserved output directory
+true tree =  test_data/true_concatenated.tre # defaults to location in pseudoobserved output directory
