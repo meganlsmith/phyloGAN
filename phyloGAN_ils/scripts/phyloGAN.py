@@ -1,78 +1,98 @@
-
-# imports
-import os
-import utils
+from phylogan_architecture import *
 import sys
-import simulators
-import phylogan_architecture
-
+from datetime import datetime
+import utils
+import os
 
 def main():
+
+    # read params file
     args = sys.argv[1:]
     parameters = utils.read_params_file(args[0])
 
-    if parameters['Simulate_pseudoobserved'] == True and (len(args) == 1 or args[1] != 'checkpoint'):
-
-        # Step 1: Simulate pseudoobserved data
-        print('\nSIMULATING PSEUDO-OBSERVED DATA.')
-        
-        os.system('mkdir %s' % parameters['Output_pseudoobserved'])
-        os.system('mkdir %s/gene_trees' % parameters['Output_pseudoobserved'])
-        os.system('mkdir %s/alignments' % parameters['Output_pseudoobserved'])
-        
-        pseudosim = simulators.Pseudo_Simulator(parameters['Num_taxa'], parameters['Coal_time'], parameters['Output_pseudoobserved'], 
-            parameters['Gene_trees'], parameters['Length'], parameters['Scale'], parameters['temp'], parameters['IQTree_path'], parameters['Nucleotide_substitution_model'])
-        pis, std_pis = pseudosim()
-        
-    
-    else:
-        print("\nANALYZING EMPIRICAL DATA.")
-    
-    # Step 2: Infer optimal coalescent time and scale values
-    """We need functions that will take empirical input, store the alignments and alignment lengths, and calculate the number of PIS and the stdev in this number of replicates of size N."""
+    os.system('mkdir %s' % parameters['results'])
     
     # read empirical data
     empirical_parser = utils.Parse_Empirical(parameters['alignment_folder'])
-    empirical_charmatrices, empirical_pis, empirical_lengths, empirical_var, num_taxa, taxon_order = empirical_parser()
+    empirical_charmatrices, empirical_pinv, empirical_lengths, num_taxa, taxon_order = empirical_parser()
     # map alignment to alisim names
     match_dict = utils.create_matchdict(taxon_order)
-    #print(match_dict)
-    
-    if len(args) > 1 and args[1] == 'checkpoint':
-        print('\nSTARTING FROM CHECKPOINT.')
-        
-        # get coal time and scale
-        inferred_coal = float(open('%s/CoalTime.txt' % parameters['results'], 'r').readlines()[-1].strip())
-        inferred_scale = float(open('%s/Scale.txt' % parameters['results'], 'r').readlines()[-1].strip())
 
-        # Stage2: Infer the species tree topology
-        
-        stage2 = phylogan_architecture.stage2(empirical_var, parameters['IQTree_path'], parameters['Batch_size'], 
-            parameters['Stage_2_Pretraining_Iterations'], parameters['Gene_tree_samples'], 
-            empirical_pis, empirical_lengths, empirical_charmatrices, taxon_order,
-            parameters['temp'], num_taxa, inferred_coal, inferred_scale, parameters['Stage_2_Pretraining_Epochs'], parameters['Stage_2_Training_Epochs'],
-            parameters['Stage_2_Training_Iterations'], parameters['Max_trees'], parameters['results'], parameters['true_tree'], parameters['Nucleotide_substitution_model'], parameters['start_tree'], parameters['check_point'], True, match_dict)
-        stage2()
+    # decide whether to run full, generator only, or discriminator only (for debugging)
+    if len(args) == 1: # then run the full inference.
 
-        
+        # initiate object of class phylogan
+        my_phylogan = phyloGAN(IQ_Tree = parameters['IQTree_path'],
+            Model = parameters['Nucleotide_substitution_model'], Length = parameters['Length'],
+            Chunks = parameters['Chunks'], Input_Order = taxon_order,
+            Input_Match_dict = match_dict, Results = parameters['results'], Temp = parameters['temp'],
+            true_tree = parameters['true_tree'], checkpoint = False, empirical_alignments = empirical_charmatrices,
+            empirical_pinv = empirical_pinv, empirical_lengths=empirical_lengths) 
     
-    else:
-        # do stage 1
-        stage1 = phylogan_architecture.stage1(parameters['Min_coal'], parameters['Max_coal'], parameters['Width_coal'], parameters['Min_scale'], parameters['Max_scale'], parameters['Width_scale'], 
-                    parameters['Stage_1_Iterations'], parameters['Stage_1_Proposals'], empirical_pis, empirical_lengths, empirical_charmatrices,
-                    parameters['temp'], num_taxa, parameters['IQTree_path'], parameters['Gene_tree_samples'], parameters['Nucleotide_substitution_model'], parameters['results'], match_dict)
-        inferred_coal, inferred_scale = stage1()
-        
-        # Stage2: Infer the species tree topology
-        
-        stage2 = phylogan_architecture.stage2(empirical_var, parameters['IQTree_path'], parameters['Batch_size'], 
-            parameters['Stage_2_Pretraining_Iterations'], parameters['Gene_tree_samples'], 
-            empirical_pis, empirical_lengths, empirical_charmatrices, taxon_order,
-            parameters['temp'], num_taxa, inferred_coal, inferred_scale, parameters['Stage_2_Pretraining_Epochs'], parameters['Stage_2_Training_Epochs'],
-            parameters['Stage_2_Training_Iterations'], parameters['Max_trees'], parameters['results'], parameters['true_tree'], parameters['Nucleotide_substitution_model'], parameters['start_tree'], parameters['check_point'], False, match_dict)
-        stage2()
+        # stage 1: infer lambda
+        print('\n\nSTAGE 1: Infer LAMBDA.\n\n')
+        estimated_scale, estimated_coal = my_phylogan.stage1(Min_scale = parameters['Min_scale'], Max_scale = parameters['Max_scale'],
+            Min_coal = parameters['Min_coal'], Max_coal = parameters['Max_coal'], Width_scale = parameters['Width_scale'],
+            Width_coal = parameters['Width_coal'], Iterations = parameters['Stage_1_Iterations'],
+	    Proposals = parameters['Stage_1_Proposals'])
+    
+
+        # get start tree
+        start_tree = utils.get_start_tree(start_tree = parameters['start_tree'],
+            coal = estimated_coal,
+            Input_Alignments = empirical_charmatrices, Results = parameters['results'],
+            Input_Order = taxon_order, Input_Match_dict = match_dict)
+
+        # stage 2: infer topology
+        print('\n\nSTAGE 2: Infer TOPOLOGY; Estimated coal = %r; Estimated scale = %r\n\n' % (estimated_coal, estimated_scale))
+        my_phylogan.stage2(Pretraining_Iterations = parameters['Stage_2_Pretraining_Iterations'],
+            Pretraining_Epochs = parameters['Stage_2_Pretraining_Epochs'],
+            Training_Iterations =  parameters['Stage_2_Training_Iterations'],
+            Training_Epochs = parameters['Stage_2_Training_Epochs'],
+            MaxTrees = parameters['Max_trees'],
+            inferred_scale = estimated_scale, inferred_coal = estimated_coal,
+            start_tree = start_tree, start_iter = 0, checkpoint_interval = parameters['checkpoint_interval'])
+
+        print('Phylogan run complete!')
+
+    elif args[1] == 'checkpoint': # then continue from a checkpoint.
+
+        # initiate object of class phylogan
+        my_phylogan = phyloGAN(IQ_Tree = parameters['IQTree_path'],
+            Model = parameters['Nucleotide_substitution_model'], Length = parameters['Length'],
+            Chunks = parameters['Chunks'], Input_Order = taxon_order,
+            Input_Match_dict = match_dict, Results = parameters['results'], Temp = parameters['temp'],
+            true_tree = parameters['true_tree'], checkpoint = True, empirical_alignments = empirical_charmatrices,
+            empirical_pinv = empirical_pinv, empirical_lengths=empirical_lengths)
+    
+        # stage 1: get estimated lambda
+        print('\n\nSTAGE 1: Get COAL and SCALE from previous run.\n\n')
+        try:
+            estimated_coal = float(open('%s/Coal.txt' % parameters['results'], 'r').readlines()[-1].strip())
+            estimated_scale = float(open('%s/Scales.txt' % parameters['results'], 'r').readlines()[-1].strip())
+        except:
+            sys.exit('ERROR: You specified to run from a checkpoint, but it does not appear that Stage 1 completed. Please run without the "checkpoint" flag.')
+
+        # get start tree
+        start_tree = open('%s/Checkpoint_trees.txt' % parameters['results'], 'r').readlines()[-1].strip()
+        print ('Start from iteraton %r.\n' % len(open('%s/Checkpoint_trees.txt' % parameters['results'], 'r').readlines()))
+        # stage 2: infer topology
+        print('\n\nSTAGE 2: Infer TOPOLOGY; Estimated coal = %r; Estimated scale = %r\n\n' % (estimated_coal, estimated_scale))
+
+        my_phylogan.stage2(Pretraining_Iterations = parameters['Stage_2_Pretraining_Iterations'],
+            Pretraining_Epochs = parameters['Stage_2_Pretraining_Epochs'],
+            Training_Iterations =  parameters['Stage_2_Training_Iterations'],
+            Training_Epochs = parameters['Stage_2_Training_Epochs'],
+            MaxTrees = parameters['Max_trees'],
+            inferred_scale = estimated_scale, inferred_coal = estimated_coal,
+            start_tree = start_tree, start_iter = len(open('%s/Checkpoint_trees.txt' % parameters['results'], 'r').readlines()), checkpoint_interval = parameters['checkpoint_interval'])
+
+
+        print('Phylogan run complete!')
+
 
 if __name__ == "__main__":
+    start = datetime.now()
     main()
-
-    
+    difference = datetime.now() - start
+    print(difference)

@@ -3,21 +3,18 @@
 
 import random
 from Bio import Phylo
-#from Bio.Phylo import TreeConstruction
 import io
 import copy
-#import re
 import ete3
 import utils
 
 class TreeMove(object):
 
-    def __init__(self, tree_str, temperature, max_trees, coal_time, Input_Match_dict):
+    def __init__(self, tree_str, temperature, max_trees, Birth_rate):
         self.tree_str = tree_str
         self.temperature = temperature
         self.max_trees = max_trees
-        self.coal_time = coal_time
-        self.Input_Match_dict = Input_Match_dict
+        self.Birth_rate = Birth_rate
 
     def prune(self,t_orig, prune_name):
         """Function to prune node. Adopted from Azouri et al. 2021)"""
@@ -104,7 +101,7 @@ class TreeMove(object):
 
         newtreestringlist = []
         for newtree in newtreelist:
-            newtreestringlist.append(newtree.write(format=6))
+            newtreestringlist.append(newtree.write(format=9))
 
         return newtreestringlist
 
@@ -220,10 +217,7 @@ class TreeMove(object):
             writetree = io.StringIO()
             Phylo.write(t, writetree, format = "newick")
             data = writetree.getvalue()
-            try:
-                current_tree = ete3.Tree(data)
-            except:
-                continue
+            current_tree = ete3.Tree(data)
             current_tree.unroot()
             derooted_neighbors.append(current_tree)
             
@@ -263,7 +257,6 @@ class TreeMove(object):
             writetree = io.StringIO()
             Phylo.write(t, writetree, format = "newick")
             data = writetree.getvalue()
-            #print(data)
             current_tree = ete3.Tree(data)
             current_tree.unroot()
             derooted_neighbors.append(current_tree)
@@ -394,7 +387,7 @@ class TreeMove(object):
             elif probability >= sprmin:
                 newtree = self.spr_single(current_tree)
             
-            newtree = utils.add_bl(newtree, self.coal_time)
+            newtree = utils.add_bl_coal(newtree, self.Birth_rate)
 
             current_tree = newtree
             trees.append(newtree)
@@ -417,12 +410,6 @@ class TreeMove(object):
         elif firstmove == 'SPR':
             trees1 = self.spr()
             trees2 = self.nni()
-        #print(firstmove)
-        #for item in trees1:
-            #print(item)
-        #print('second move')
-        #for item in trees2:
-        #    print(item)
 
         treelist = []
         if len(trees1) > self.max_trees:
@@ -437,7 +424,6 @@ class TreeMove(object):
         # add branch lengths to trees
         treelist = []
         for tree in trees:
-            new_tree = utils.add_bl(tree, self.coal_time)
-            new_tree = utils.replace_names(tree_string = new_tree, Input_Match_dict = self.Input_Match_dict)
-            treelist.append(new_tree)
+            new_tree = utils.add_bl_coal(tree, self.Birth_rate)
+            treelist.append(new_tree.as_string(schema="newick"))
         return treelist

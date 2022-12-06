@@ -2,23 +2,15 @@
 
 # python imports
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, \
-    MaxPooling2D, Dropout
+    MaxPooling2D, Dropout 
 from tensorflow.keras import Model
 
 
 class discriminator(Model):
-    """Basic CNN for comparing phylogenetic datasets.
-    The shape of the training data is (n, S, 4), where
-    n is the number of species, S is the number of sites,
-    and 5 is the number of channels (A, T, C, G).
-    In addition, we have an extra channel with the proportion of invariant sites.
-    We combine convolutional layers for these two classes in the second layer of our CNN.
-    Architecture adapted from Wang et al. (2021)"""
+    """Basic CNN for comparing phylogenetic datasets."""
 
     def __init__(self):
         super(discriminator, self).__init__()
-
-        # We use (1, 5) for permutation invariance following Wang et al. (2021)
 
         self.conv1 = Conv2D(10, (4,1), (4,1), activation='relu')
         self.conv2 = Conv2D(10, (2,1), (4,1), activation='relu')
@@ -31,21 +23,16 @@ class discriminator(Model):
         self.fc1 = Dense(128, activation='relu')
         self.fc2 = Dense(128, activation='relu')
 
-        self.dense3b = Dense(1, activation = 'linear')#2, activation='softmax') # value is the number of classes
-
-
-
-
+        self.dense3b = Dense(1, activation = 'linear')
 
 
     def call_mathieson(self, x, training=None):
-        """x is the genotype matrix, dist is the SNP distances"""
-
+        """x is the genotype matrix"""
         x = x.reshape(x.shape[0], x.shape[1], x.shape[2], 1)
         x = self.conv1(x)
-        x = self.pool(x) # pool
+        x = self.pool(x) 
         x = self.conv2(x)
-        x = self.pool(x) # pool
+        x = self.pool(x)
 
 
         x = self.flatten(x)

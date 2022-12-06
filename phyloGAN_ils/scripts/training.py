@@ -1,30 +1,45 @@
-from tensorflow import GradientTape, ones_like, zeros_like, math
 from tensorflow.keras import losses, optimizers
+from tensorflow import GradientTape, ones_like, zeros_like, math
 import numpy as np
-import os
+from simulators import *
 
 
 class Simple_Training(object):
 
-    def __init__(self, IQ_Tree, Model, Chunks, Length, Input_Alignment, Input_Order, Input_Match_dict, Temp):
+    def __init__(self, IQ_Tree, Model, Chunks, Length, Input_Alignments, Input_Lengths, Input_Order, Input_Match_dict, Temp):
         self.IQ_Tree = IQ_Tree
         self.Model = Model
         self.Chunks = Chunks
         self.Length = Length
-        self.Input_Alignment = Input_Alignment
+        self.Input_Alignments = Input_Alignments
+        self.Input_Lengths = Input_Lengths
         self.Input_Order = Input_Order
         self.Input_Match_dict = Input_Match_dict
         self.Temp = Temp
         self.Simulator = Simulator(IQ_Tree = self.IQ_Tree, Model = self.Model,
             Chunks = self.Chunks, Length = self.Length,
-            Input_Alignment = self.Input_Alignment, Input_Order = self.Input_Order,
+            Input_Alignments = self.Input_Alignments, Input_Order = self.Input_Order, Input_Lengths = self.Input_Lengths,
             Input_Match_dict = self.Input_Match_dict, Temp = self.Temp)
 
+    def simple_loss_stage1(self, current_scale, current_coal):
+        """Simulate data and calculate generator loss."""
+
+        ## simulate data
+        simulated_data, empirical_samples = self.Simulator.simulateScaleCoal(current_scale, current_coal)
+
+        # subset N chunks of empirical data
+        empirical_data = self.Simulator.countPinvChunk(empirical_samples)
+
+        # calculate averages to compute difference
+        avg_empirical = np.average(empirical_data)
+        avg_simulated = np.average(simulated_data)
+
+        return abs(avg_empirical - avg_simulated)
 
 
 class Training(object):
 
-    def __init__(self, discriminator, iqtree_path, maxSNPs, Chunks):
+    def __init__(self, discriminator, IQ_Tree, Model, Chunks, Length, Input_Alignments, Input_Lengths, Input_Order, Input_Match_dict, Temp, coal, scale, numPretrainingEpochs, numTrainingEpochs, maxSNPs):
         self.cross_entropy = losses.BinaryCrossentropy(from_logits=True)
         self.lr_schedule = optimizers.schedules.ExponentialDecay(
             initial_learning_rate=1e-3,
@@ -32,9 +47,24 @@ class Training(object):
                     decay_rate=0.9)
         self.disc_optimizer = optimizers.Adam()
         self.discriminator = discriminator
-        self.iqtree_path = iqtree_path
-        self.maxSNPs = maxSNPs
+        self.IQ_Tree = IQ_Tree
+        self.Model = Model
         self.Chunks = Chunks
+        self.Length = Length
+        self.Input_Alignments = Input_Alignments
+        self.Input_Lengths = Input_Lengths
+        self.Input_Order = Input_Order
+        self.Input_Match_dict = Input_Match_dict
+        self.Temp = Temp
+        self.coal = coal
+        self.scale = scale
+        self.numPretrainingEpochs = numPretrainingEpochs
+        self.numTrainingEpochs = numTrainingEpochs
+        self.maxSNPs = maxSNPs
+        self.Simulator = Simulator(IQ_Tree = self.IQ_Tree, Model = self.Model,
+            Chunks = self.Chunks, Length = self.Length,
+            Input_Alignments = self.Input_Alignments, Input_Order = self.Input_Order, Input_Lengths = self.Input_Lengths,
+            Input_Match_dict = self.Input_Match_dict, Temp = self.Temp)
 
 
     def discriminator_loss(self, real_output, fake_output):
@@ -64,7 +94,7 @@ class Training(object):
 
 
             # feed real and generated regions to discriminator
-            real_output = self.discriminator.call_mathieson(real_regions, training=True)
+            real_output = self.discriminator.call_mathieson(real_regions,training=True)
             fake_output = self.discriminator.call_mathieson(all_generated_regions, training=True)
 
 
@@ -76,18 +106,79 @@ class Training(object):
         gradients_of_discriminator = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         self.disc_optimizer.apply_gradients(zip(gradients_of_discriminator, self.discriminator.trainable_variables))
 
-        return real_acc, fake_acc, float(disc_loss)
+        return real_acc, fake_acc, disc_loss
 
 
-    def train_sa_stage2(self, epochs, generated_regions, generated_var, empirical_regions, empirical_var):
-    
-    
-        for epoch in range(epochs):
-    
+
+    def pretraining_stage2(self, ):
+        """Simulate data and calculate generator loss."""
+
+        # Simulate a tree
+        tree = self.Simulator.simulateCoalTree(self.coal)
+
+        for epoch in range(self.numPretrainingEpochs):
+
+            # simulate data
+            all_generated_regions, all_generated_pinv, sampled = self.Simulator.simulateonTree(tree, self.maxSNPs, self.coal, self.scale)
+
+            # subset N chunks of empirical data
+            all_empirical_regions, all_empirical_pinv = utils.sequencetonparrayChunk(empirical_alignments = self.Input_Alignments,
+                numTaxa = len(self.Input_Order), maxSNPs = self.maxSNPs, Length = self.Length, Chunks = self.Chunks, sampled = sampled, Input_Order = self.Input_Order, Input_Match_dict = self.Input_Match_dict)
+
+            # do TRAINING
+            real_acc, fake_acc, disc_loss = self.train_step_stage2(all_empirical_regions, all_empirical_pinv, all_generated_regions, all_generated_pinv)
+
+            # print results
+            if (epoch+1) % 5 == 0:
+               template = 'Epoch {}, Loss: {}, Real Acc: {}, Fake Acc: {}'
+               print(template.format(epoch+1,
+                   disc_loss,
+                   real_acc/self.Chunks * 100,
+                   fake_acc/self.Chunks * 100))
+
+
+
+        return real_acc/self.Chunks, fake_acc/self.Chunks, float(disc_loss), tree
+
+    def generator_loss_stage2(self, proposed_tree):
+       # simulate the fake data
+
+        all_generated_regions = []
+        all_generated_pinv = []
+
+        # simulate data
+        all_generated_regions, all_generated_pinv, sampled = self.Simulator.simulateonTree(proposed_tree, self.maxSNPs, self.coal, self.scale)
+
+
+        all_generated_regions = np.array(all_generated_regions)
+        all_generated_pinv = np.array(all_generated_pinv)
+        fake_output = self.discriminator.call_mathieson(all_generated_regions,training=False)
+
+        fake_acc = np.sum(fake_output <0)/self.Chunks # negative logit => pred 0
+        loss = self.cross_entropy(ones_like(fake_output), fake_output)
+
+        return loss.numpy(), fake_acc
+
+
+    def train_sa_stage2(self, proposed_tree):
+
+
+        for epoch in range(self.numTrainingEpochs):
+
+           # simulate data
+           all_generated_regions, all_generated_pinv, sampled = self.Simulator.simulateonTree(proposed_tree, self.maxSNPs, self.coal, self.scale)
+
+           all_generated_regions = np.array(all_generated_regions)
+           all_generated_pinv = np.array(all_generated_pinv)
+
+           # subset N chunks of empirical data
+           all_empirical_regions, all_empirical_pinv = utils.sequencetonparrayChunk(empirical_alignments = self.Input_Alignments,
+                numTaxa = len(self.Input_Order), maxSNPs = self.maxSNPs, Length = self.Length, Chunks = self.Chunks, sampled = sampled, Input_Order = self.Input_Order, Input_Match_dict = self.Input_Match_dict)
+
            # do training
-           real_acc, fake_acc, disc_loss = self.train_step_stage2(empirical_regions, empirical_var, generated_regions, generated_var)
-    
-    
+           real_acc, fake_acc, disc_loss = self.train_step_stage2(all_empirical_regions, all_empirical_pinv, all_generated_regions, all_generated_pinv)
+
+
            # print results
            if (epoch+1) % 5 == 0:
                template = 'Epoch {}, Loss: {}, Real Acc: {}, Fake Acc: {}'
@@ -95,18 +186,8 @@ class Training(object):
                    disc_loss,
                    real_acc/self.Chunks * 100,
                    fake_acc/self.Chunks * 100))
-    
-        # remove the tree
-        #
-        return real_acc/self.Chunks, fake_acc/self.Chunks, float(disc_loss), self.discriminator
 
+       
 
-    def generator_loss(self, generated_regions, generated_var):
+        return real_acc/self.Chunks, fake_acc/self.Chunks, disc_loss, self.discriminator
 
-
-        fake_output = self.discriminator.call_mathieson(generated_regions, training=False)
-
-        fake_acc = np.sum(fake_output <0)/self.Chunks # negative logit => pred 0
-        loss = self.cross_entropy(ones_like(fake_output), fake_output)
-
-        return loss.numpy(), fake_acc
