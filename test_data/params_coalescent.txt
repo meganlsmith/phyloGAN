@@ -1,52 +1,43 @@
 # Path Parameters
 
-IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2 # Path to executable for IQ-TREE.
+IQTree path = ~/Documents/Programs/iqtree-2.2.0-beta-MacOSX/bin/iqtree2
 
 # Input files
-alignment folder = ./test_data/gene_alignments # Path to directory containing only the gene alignments.
-start tree = Random # Indicate whether phyloGAN should start with a random ('Random') or neighbor joining ('NJ') tree. Random tree setting is recommended.
-check point = 50 # Frequency at which checkpoint files should be stored. For example, 50 indicates that checkpoints will be stored every 50 iterations.
-
+alignment folder = ./test_data/gene_alignments/ 
+start tree = Random # Random or provide the path to a file with a starting tree in newick format.
+checkpoint interval = 50
 # Output files
-results = test_ils # Path to folder for storing results.
-temp = temp_ils # Path to temp folder for storing temporary files. This file will be deleted periodically.
+results = results_ils # name of results folder
+temp = temp_ils # name of temp folder, will be deleted
 
 # Models and model parameters
 
-Nucleotide substitution model = JC # Model string for use in AliSim simulations. Any string that can be taken as input by AliSim should work.
-Min coal = 0.01 # Minimum bound on coalescent parameter.
-Max coal = 10 # Maximum bound on coalescent parameter.
-Min scale = 0.001 # Minimum bound on scaling parameter.
-Max scale = 0.05 # Maximum bound on scaling parameter. 
-Width coal = None # Width of coalescent proposals. Defaults to (Max_coal + Min_coal)/2/2.
-Width scale = None # Width of scale proposals. Defaults to (Max_scale + Min_scale)/2/2.
+Nucleotide substitution model = JC
+Min coal = 0.01
+Max coal = 10
+Min scale = 0.001
+Max scale = 0.05
+Width coal = None
+Width scale = None
 
 # Training steps and parameters
 
 # all stages
-Gene tree samples = 2 # Number of gene trees per mini-batch.
-Length = 500 # Number of basepairs per gene tree per mini-batch.
-Batch size = 2 # Number of chunks to use in each mini-batch.
+Length = 1000 # number of basepairs in each 'chunk'
+Chunks = 25 # number of chunks to use in each mini-batch
 
-# stage 1 inferring coalescent parameter and scale
+# stage 1
 
-Stage 1 Iterations = 2 # Number of training iterations in stage 1.
+Stage 1 Iterations = 2 # number of training iterations in stage 1
 Stage 1 Proposals = 1 # number of parameter proposals to consider at each training iteration in stage 1, defaults to 15
 
-# stage 2 inferring topology
-Stage 2 Pre-training Iterations = 2 # Number of pre-training iterations in stage 2.
-Stage 2 Training Iterations = 2 # Number of training iterations in stage 2.
-Stage 2 Pre-training Epochs = 1 # Number of pre-training epochs in stage 2.
-Stage 2 Training Epochs = 1 # Number of training epochs in stage 2, defaults to match number of pre-training epochs.
-Max Trees = 1 # Maximum number of trees to consider at each training iteration in stage 2, defaults to 5.
+# stage 2
+Stage 2 Pre-training Iterations = 2 # number of pre-training iterations in stage 2
+Stage 2 Training Iterations = 2 # number of training iterations in stage 2
+Stage 2 Pre-training Epochs = 1 # number of pre-training epochs in stage 2
+Stage 2 Training Epochs = 1 # number of training epochs in stage 2, defaults to match number of pre-training epochs
+Max Trees = 1 # maximum number of trees to consider at each training iteration in stage 2, defaults to 5
 
 # Simulation parameters
-Simulate_pseudoobserved = False # Indicate whether phyloGAN should simulate pseudoobserved data. Used only for very specific testing scenarios.
-Simulation nucleotide substitution model = JC # Indicate the model to be used by AliSim when generating pseudoobserved data.
-Gene trees = 1000 # Number of gene trees to simulate for pseudoobserved data.
-Num taxa = 6 # Number of taxa in pseudoobserved datasets.
-Coal time = 10 # Mean of the exponential distribution parameterizing internal branch lengths in coalescent units for pseudoobserved datasets.
-Scale = 0.001 # Scaling parameter for simulating sequence data in AliSim for pseudoobserved datasets.
-Output pseudoobserved = ./pseudoobserved_six_coal_rep1/ # Directory and prefix for pseudoobserved data storage.
-true tree = test_data/true_ils.tre # Path to the 'true' tree. Defaults to location in pseudoobserved output directory when pseudoobserved data are simulated. Use None if not available.
+true tree = ./test_data/true_ils.tre # defaults to location in pseudoobserved output directory
 
