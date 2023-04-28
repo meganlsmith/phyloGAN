@@ -1,3 +1,4 @@
+"""Parts of this code are adapted from Wang et al., 2021, Molecular Ecology Resources, https://doi.org/10.1111/1755-0998.13386."""
 from tensorflow.keras import losses, optimizers
 from tensorflow import GradientTape, ones_like, zeros_like, math
 import numpy as np
