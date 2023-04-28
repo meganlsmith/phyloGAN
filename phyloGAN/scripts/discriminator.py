@@ -1,4 +1,5 @@
 """CNN discriminator and training functions."""
+"""Parts of this code are adapted from Wang et al., 2021, Molecular Ecology Resources, https://doi.org/10.1111/1755-0998.13386."""
 
 # python imports
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, \
