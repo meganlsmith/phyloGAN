@@ -12,8 +12,8 @@ class discriminator(Model):
     def __init__(self):
         super(discriminator, self).__init__()
 
-        self.conv1 = Conv2D(10, (4,1), (4,1), activation='relu')
-        self.conv2 = Conv2D(10, (2,1), (4,1), activation='relu')
+        self.conv1 = Conv2D(10, (4,1), (2,1), activation='relu')
+        self.conv2 = Conv2D(10, (2,1), (2,1), activation='relu')
 
         self.pool = MaxPooling2D(pool_size = (1,2), strides = (1,2))
 

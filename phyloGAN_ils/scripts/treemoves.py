@@ -214,12 +214,15 @@ class TreeMove(object):
         # unroot trees
         derooted_neighbors = []
         for t in neighbors:
-            writetree = io.StringIO()
-            Phylo.write(t, writetree, format = "newick")
-            data = writetree.getvalue()
-            current_tree = ete3.Tree(data)
-            current_tree.unroot()
-            derooted_neighbors.append(current_tree)
+            try:
+                writetree = io.StringIO()
+                Phylo.write(t, writetree, format = "newick")
+                data = writetree.getvalue()
+                current_tree = ete3.Tree(data)
+                current_tree.unroot()
+                derooted_neighbors.append(current_tree)
+            except:
+                continue
             
         
         # remove duplicates

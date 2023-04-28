@@ -228,8 +228,7 @@ class phyloGAN(object):
                 p_accept = 1
 
             else:
-                p_accept =  current_loss/proposed_loss_best*T*0.1
-                #p_accept =  current_loss/proposed_loss_best
+                p_accept =  current_loss/proposed_loss_best*T*0.25
                 print(p_accept, T)
             rand = np.random.rand()
             accept = rand < p_accept
@@ -256,8 +255,8 @@ class phyloGAN(object):
             discriminator_fake_acc.append(fake_acc)
 
             # recalculate loss 
-            recalc_loss, recalc_accuracy = Stage2_Trainer.generator_loss_stage2(current_tree)
-            current_loss = recalc_loss
+            #recalc_loss, recalc_accuracy = Stage2_Trainer.generator_loss_stage2(current_tree)
+            #current_loss = recalc_loss
             
             # log if iteration is multiple of 100 (do 10 for testing, then change to 100)
 
