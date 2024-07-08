@@ -7,5 +7,7 @@ authors:
   given-names: "M.W."
 title: "phyloGAN"
 version: 1.0.0
-doi: 10.5281/zenodo.12688252
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.12688252
 date-released: 2023
