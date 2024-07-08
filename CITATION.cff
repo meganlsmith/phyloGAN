@@ -1,0 +1,11 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Smith"
+  given-names: "M.L.
+- family-names: "Hahn"
+  given-names: "M.W."
+title: "phyloGAN"
+version: 1.0.0
+doi: 
+date-released: 2023
